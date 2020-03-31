@@ -1,0 +1,198 @@
+T: "DE"
+VER: 1.0
+
+prefix: "&8[&eMailMe&8]&r"
+
+cmd:
+  lang-change: "@prefix &eSprache geändert!"
+  notify-change: "@prefix &eMitteilungs-Einstellungen aktualisiert!"
+  mail-unread: "@prefix &eDu hast ungelesene Nachrichten!"
+
+text:
+  format:
+    - "&8< &eNachrict &8>"
+    - "&7Nachricht von: &b%sender%"
+    - "&7Erhalten am: &b%time%"
+    - "&7Inhalt: %contents%"
+  hover: "&cKlicke zum Antworten!"
+  prev-page: "&e<<< Vorherige Seite"
+  prev-page-hover: "&cKlicke für die vorherige Seite!"
+  next-page: "&eNächste Seite >>>"
+  next-page-hover: "&cKlicke für die nächste Seite!"
+
+
+notify:
+  received: "@prefix &eDu hast eine Nachricht von %s erhalten"
+  sent: "@prefix &eDu hast eine Nachricht an %s gesendet"
+  could-not-send: "@prefix &cWarnung! &eKonnte Nachricht nicht an %s senden. Du hast erst kürzlich eine gesendet. Bitte versuch es später erneut."
+
+mail:
+  message: "@prefix Was soll die Nachricht sagen?"
+  sound-input: "@prefix Welchen Sound möchtest du gerne spielen? Gültige Sounds kannst du hier finden: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Sound.html"
+
+mailbox:
+  not-chest: "@prefix Deine Mailbox muss eine Truhe sein!"
+  mailbox-set: "@prefix Deine Mailbox wurde gesetzt!"
+  mailbox-removed: "@prefix Deine Mailbox wurde entfernt!"
+
+help:
+  - "&8[&eMailMe&8]"
+  - "&e/mail lang <Sprache> &7Sprache ändern"
+  - "&e/mail notify <true/false> &7Benachrichtigungen ändern"
+  - "&e/mail read &7Deine Nachrichten lesen"
+  - "&e/mail send &7Eine Nachricht senden"
+  - "&e/mail text &7Nachrichten als text lesen"
+  - "&e/mail mailbox <set/remove>"
+
+gui:
+  read-title: "Nachricht lesen"
+  choose-player-title: "Wähle Empfänger"
+  item-input-title: "Items zum senden einfügen"
+  choose-icon-title: "Icon wählen"
+
+
+  search: "Schreibe den Namen des Spielers, welchen du gerne finden willst"
+  mail:
+    title: "&7Von: &b@sender"
+    lore:
+      - ""
+      - "&7Erhalten am: &b@time"
+      - "&7Nachrichten Typ: &b@type"
+      - "&7Gelesen: &b@read"
+      - ""
+      - "&bPro Tip: &7Klicke um die Nachricht zu erhalten!"
+  back-button:
+    title: "&8[&eVorige Seite&8]"
+    material: REDSTONE_TORCH
+    amount: 1
+    lore:
+      - "&7Klicke um zur vorigen"
+      - "&7Seite zu gelangen!"
+    glow: true
+    skull-texture: ""
+  forward-button:
+    title: "&8[&eNächste Seite&8]"
+    material: REDSTONE_TORCH
+    amount: 1
+    lore:
+      - "&7Klicke um zur nächsten"
+      - "&7Seite zu gelangen!"
+    glow: true
+    skull-texture: ""
+  exit-button:
+    title: "&8[&eSeite verlassen&8]"
+    material: BARRIER
+    amount: 1
+    lore:
+      - "&7Klicke um das"
+      - "&7GUI zu schliessen!"
+    glow: true
+    skull-texture: ""
+  search-button:
+    title: "&8[&eSuchen&8]"
+    material: BOOK
+    amount: 1
+    lore:
+      - "&7Klicke um nach"
+      - "&7Spielername zu suchen!"
+    glow: true
+    skull-texture: ""
+  no-results:
+    title: "&cKeine Resultate :("
+    material: GLASS_BOTTLE
+    amount: 1
+    lore:
+      - "&7Versuche mit einem anderen"
+      - "&7Kriterium zu suchen."
+    glow: true
+    skull-texture: ""
+  choose:
+    message:
+      title: "&8[&eTextnachricht&8]"
+      material: PAPER
+      amount: 1
+      lore:
+        - "&7Klicke um jemandem eine"
+        - "&7Textnachricht zu senden!"
+      glow: true
+      skull-texture: ""
+    item:
+      title: "&8[&eItem Nachricht&8]"
+      material: PAPER
+      amount: 1
+      lore:
+        - "&7Klicke um jemandem eine"
+        - "&7Item Nachricht zu senden!"
+      glow: true
+      skull-texture: ""
+    sound:
+      title: "&8[&eSound Nachricht&8]"
+      material: PAPER
+      amount: 1
+      lore:
+        - "&7Klicke um jemandem eine"
+        - "&7Sound Nachricht zu senden!"
+      glow: true
+      skull-texture: ""
+    location:
+      title: "&8[&eOrt Nachricht&8]"
+      material: PAPER
+      amount: 1
+      lore:
+        - "&7Klicke um jemandem eine"
+        - "&7Orts Nachricht zu senden!"
+      glow: true
+      skull-texture: ""
+  icon-custom:
+    title: "&8[&cBenutzerdefiniert&8]"
+    material: YELLOW_STAINED_GLASS_PANE
+    amount: 1
+    lore:
+      - "&7Klicke mit einem Item um es als"
+      - "&7Icon zu setzten."
+      - "&7Du wirst das Item nicht verlieren."
+    glow: true
+    skull-texture: ""
+  remove-filter:
+    title: "&8[&dFilter entfernen&8]"
+    material: IRON_BARS
+    amount: 1
+    lore:
+      - "&7Klicke um sämtliche Filter"
+      - "&7im Menu zu entfernen!"
+    glow: true
+    skull-texture: ""
+  loading:
+    title: "&cLade..."
+    material: SKELETON_SKULL
+    amount: 1
+    lore:
+      - ""
+    glow: true
+    skull-texture: ""
+  continue:
+    title: "&8[&eWeiter >&8]"
+    material: EMERALD_BLOCK
+    amount: 1
+    lore:
+      - "&7Klicke um zur nächsten"
+      - "&7Seite zu kommen!"
+    glow: true
+    skull-texture: ""
+  text-button:
+    title: "&8[&eAls Text lesen&8]"
+    material: MAP
+    amount: 1
+    lore:
+      - "&7Klicke um deine Nachricht"
+      - "&7als Text zu lesen."
+    glow: true
+    skull-texture: ""
+  read-mail:
+    title: "&eNachricht"
+    lore:
+      - "&7Klicke um die"
+      - "&7Nachricht zu erhalten."
+
+
+
