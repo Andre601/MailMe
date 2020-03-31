@@ -5,7 +5,7 @@ prefix: "&8[&eMailMe&8]&r"
 
 cmd:
   lang-change: "@prefix &eSprache geändert!"
-  notify-change: "@prefix &eMitteilungs-Einstellungen aktualisiert!"
+  notify-change: "@prefix &eBenachrichtigungseinstellungen aktualisiert!"
   mail-unread: "@prefix &eDu hast ungelesene Nachrichten!"
 
 text:
@@ -38,7 +38,7 @@ mailbox:
 help:
   - "&8[&eMailMe&8]"
   - "&e/mail lang <Sprache> &7Sprache ändern"
-  - "&e/mail notify <true/false> &7Benachrichtigungen ändern"
+  - "&e/mail notify <true/false> &7Benachrichtigungseinstellungen ändern"
   - "&e/mail read &7Deine Nachrichten lesen"
   - "&e/mail send &7Eine Nachricht senden"
   - "&e/mail text &7Nachrichten als text lesen"
