@@ -7,7 +7,7 @@ cmd:
   lang-change: "@prefix &eSprache geändert!"
   notify-change: "@prefix &eBenachrichtigungseinstellungen aktualisiert!"
   mail-unread: "@prefix &eDu hast ungelesene Nachrichten!"
-  invalid-preset-key: "@prefix &eUngültige voreingestellte Taste! Überprüfen Sie Ihre config.yml auf gültige Werte"
+  invalid-preset-key: "@prefix &eUngültige voreingestellte Taste! Überprüfe deine config.yml auf gültige Werte"
   vault-insufficient-funds: "@prefix &eUnzureichende Mittel!"
 text:
   format:
@@ -31,7 +31,7 @@ notify:
 mail:
   message: "@prefix Was soll die Nachricht sagen?"
   sound-input: "@prefix Welchen Sound möchtest du gerne spielen? Gültige Sounds kannst du hier finden: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Sound.html"
-  no-space: "@prefix Sie haben keinen Platz in Ihrem Inventar, um dies zu beanspruchen!"
+  no-space: "@prefix Du hast keinen Platz im Inventar, um dies zu beanspruchen!"
 
 mailbox:
   not-chest: "@prefix Deine Mailbox muss eine Truhe sein!"
@@ -46,7 +46,8 @@ help:
   - "&e/mail send &7Eine Nachricht senden"
   - "&e/mail text &7Nachrichten als text lesen"
   - "&e/mail mailbox <set/remove>"
-  - "&e/mailme admin send <all/playername> [Preset-ID] &7Senden Sie eine Standardmail."
+  - "&e/mail defaultMB &7Setzt die Standart Mailbox"
+  - "&e/mailme admin send <all/playername> [Preset-ID] &7Sende eine Standardmail."
   - "&e/mailme admin preset <id-to-set> &7Legt eine Voreinstellung für das Senden durch den Administrator fest"
 
 gui:
@@ -198,18 +199,17 @@ gui:
     lore:
       - "&7Klicke um die"
       - "&7Nachricht zu erhalten."
-  are-you-sure: # TRANSLATION REQUIRED! Contributions would be great!
+  are-you-sure:
     title: "&aBist du sicher?"
     material: EMERALD_BLOCK
     amount: 1
     glow: true
     lore:
-      - "&7Klicken Sie erneut mit der rechten Maustaste"
-      - "&7Löschen Sie diese Mail"
+      - "&7Erneuter Rechtsklick wird"
+      - "&7diese Mail löschen."
       - ""
-      - "&7Alternativ können Sie mit der linken Maustaste darauf klicken"
-      - "&7Brechen Sie den Vorgang ab"
-      - "&bÜbersetzung gehört!"
+      - "&7Klicke mir der linken Maustaste,"
+      - "&7um diesen Vorgang abzubrechen."
 
 
 
