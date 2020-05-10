@@ -18,7 +18,6 @@ package com.haroldstudios.mailme.mail.types;
 
 import com.haroldstudios.mailme.mail.Mail;
 import net.md_5.bungee.api.chat.*;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -31,21 +30,21 @@ import java.util.UUID;
 @SuppressWarnings({"unused"})
 public final class MailSound extends Mail {
 
-    private Sound sound;
+    private final Sound sound;
 
-    public MailSound(ItemStack icon, List<OfflinePlayer> recipients, Sound sound) {
-        this(icon, recipients, sound, "", null);
+    public MailSound(ItemStack icon, List<UUID> recipients, Sound sound) {
+        this(icon, recipients, sound, "", null, false, false);
     }
 
-    public MailSound(final ItemStack icon, final List<OfflinePlayer> recipients, final Sound sound, final String msg, final UUID sender) {
-            super(icon, new Date());
+    public MailSound(final ItemStack icon, final List<UUID> recipients, final Sound sound, final String msg, final UUID sender, final boolean anonymous, boolean server) {
+            super(icon, new Date(), anonymous, server);
             super.addRecipients(recipients);
             this.sound = sound;
             super.setSender(sender);
     }
 
-    public MailSound(final ItemStack icon, final Date date, final List<OfflinePlayer> recipients, final Sound sound, final UUID sender) {
-        super(icon, date);
+    public MailSound(final ItemStack icon, final Date date, final List<UUID> recipients, final Sound sound, final UUID sender, boolean anonymous, boolean server) {
+        super(icon, date, anonymous, server);
         super.addRecipients(recipients);
         this.sound = sound;
         super.setSender(sender);
@@ -72,7 +71,7 @@ public final class MailSound extends Mail {
 
     @Override
     public Mail clone() {
-        MailSound mail = new MailSound(getIcon(), getDate(), Collections.emptyList(), sound, getSender());
+        MailSound mail = new MailSound(getIcon(), getDate(), Collections.emptyList(), sound, getSender(), isAnonymous(), isServer());
         mail.addRecipientsUUID(getRecipients());
         return mail;
     }

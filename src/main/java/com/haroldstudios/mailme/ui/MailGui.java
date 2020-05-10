@@ -29,7 +29,7 @@ import java.util.List;
 public final class MailGui extends PaginationGui {
 
     public MailGui(MailMe plugin, Player player, List<?> items, int page) {
-        super(plugin, player, items, page);
+        super(plugin, player, items, page, null);
         updateTitlePath(getPlugin().getLocale().getMessage(getPlayerData().getLang(), "gui.read-title"));
         applyNavBut(page);
 
@@ -37,6 +37,12 @@ public final class MailGui extends PaginationGui {
             event.setCancelled(true);
             getGui().close(player);
             plugin.getCmds().readAsText(player, 0);
+            GuiHandler.playUISound(player);
+        }));
+
+        getGui().setItem(4,1, new GuiItem(GuiHandler.getSend(getPlugin().getLocale(), getPlayerData().getLang()), event -> {
+            event.setCancelled(true);
+            getPlugin().getCmds().send(player, new String[]{"send"});
             GuiHandler.playUISound(player);
         }));
     }
@@ -63,6 +69,8 @@ public final class MailGui extends PaginationGui {
            return;
         }
 
+
+
         List<GuiItem> mailList = new ArrayList<>();
         int i = 0;
         for (Object m : super.getPage(getCurrentPage())) {
@@ -70,17 +78,15 @@ public final class MailGui extends PaginationGui {
             // If it's in this class - it will be mail!
             Mail mail = (Mail) m;
 
-            List<String> lore = Utils.applyPlaceHolders(mail, getPlugin().getLocale().getMessages(super.getPlayerData().getLang(), "gui.mail.lore"));
+            List<String> lore = Utils.applyPlaceHolders(mail, getPlugin().getLocale().getMessages(super.getPlayerData().getLang(), "gui.mail.lore"), getPlayer().getUniqueId());
             String[] stockArr = new String[lore.size()];
             stockArr = lore.toArray(stockArr);
 
             ItemBuilder itemBuilder = new ItemBuilder(mail.getIcon().getType())
-                    .setName(Utils.applyPlaceHolders(mail, getPlugin().getLocale().getMessage(super.getPlayerData().getLang(), "gui.mail.title")))
-                    .setLore(stockArr);
+                    .setName(Utils.applyPlaceHolders(mail, getPlugin().getLocale().getMessage(super.getPlayerData().getLang(), "gui.mail.title"), getPlayer().getUniqueId()))
+                    .setLore(stockArr)
+                    .glow(!mail.isRead());
 
-            if (!mail.isRead()) {
-                itemBuilder.glow();
-            }
             int finalI = i;
             GuiItem item = new GuiItem(itemBuilder.build(), event -> {
                 event.setCancelled(true);

@@ -32,36 +32,38 @@ public final class ItemInputGui {
 
     private final Gui gui;
     private final Player player;
-    private List<ItemStack> items = new ArrayList<>();
+    private final List<ItemStack> items = new ArrayList<>();
+    private boolean gracefulClose = false;
 
-    public ItemInputGui(MailMe plugin, Player player) {
+    public ItemInputGui(MailMe plugin, Player player, MailBuilder builder) {
         this.gui = new Gui(plugin, 2, "MailMe // " + plugin.getLocale().getMessage(plugin.getDataStoreHandler().getPlayerData(player).getLang(), "gui.item-input-title"));
         this.player = player;
         gui.getFiller().fillBottom(new GuiItem(new ItemStack(Material.BLACK_STAINED_GLASS_PANE), event -> event.setCancelled(true)));
         gui.setItem(2,9, new GuiItem(GuiHandler.getContinue(plugin.getLocale(), plugin.getDataStoreHandler().getPlayerData(player).getLang()), event -> {
             event.setCancelled(true);
-            MailBuilder.Builder draft = MailBuilder.getMailDraft(player);
             try {
 
                 for (int i = 0; i < 9; i++) {
                     if (event.getInventory().getItem(i) == null)
                         continue;
                     org.bukkit.inventory.ItemStack stack = new ItemStack(event.getInventory().getItem(i)); // Convert from NMS ItemStack to Bukkit ItemStack
-                    draft.addItem(stack);
+                    builder.addItem(stack);
                 }
                 GuiHandler.playDingSound(player);
-                if (MailBuilder.getMailDraft(player).getItems().size() < 1) return;
-                draft.build().sendMail();
+                if (builder.getItems().size() < 1) return;
+                builder.build().sendMail();
+                gracefulClose = true;
 
             } catch (IncompleteBuilderException ibe) {
                 ibe.printStackTrace();
             }
+
             gui.close(player);
         }));
 
         gui.setCloseGuiAction(event -> {
 
-            if (MailBuilder.getMailDraft(player) == null) return;
+            if (gracefulClose) return;
             for (int i = 0; i < 9; i++) {
                 ItemStack item = event.getInventory().getItem(i);
                 if (item == null)

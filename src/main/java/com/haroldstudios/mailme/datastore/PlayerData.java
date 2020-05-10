@@ -33,7 +33,7 @@ public final class PlayerData {
 
     private final TreeMap<Date,Mail> mail = new TreeMap<>();
     private com.haroldstudios.mailme.utility.Locale.LANG lang;
-    private UUID uuid;
+    private final UUID uuid;
     private boolean notify = true;
     public int x,y,z;
     public String world;
@@ -54,7 +54,7 @@ public final class PlayerData {
             this.y = defaultLoc.getBlockY();
             this.z = defaultLoc.getBlockZ();
             Bukkit.getScheduler().runTask(MailMe.getInstance(), () ->
-                this.world = defaultLoc.getWorld().getName());
+                this.world = defaultLoc.getWorld() == null ? "world" : defaultLoc.getWorld().getName());
         }
     }
 
@@ -129,8 +129,19 @@ public final class PlayerData {
      * @param location of new mailbox
      */
     public void setMailBox(Location location) {
+
+        // If could potentially be in our cache
+        if (getMailBox() != null) {
+            // Remove from mailboxes cache
+            MailMe.getInstance().getDataStoreHandler().getPlayerMailBoxes().remove(getMailBox());
+        }
+
+
         if (location == null) {
+
             this.world = null;
+            update();
+
             return;
         }
         this.x = location.getBlockX();
@@ -138,6 +149,8 @@ public final class PlayerData {
         this.z = location.getBlockZ();
         this.world = location.getWorld().getName();
         update();
+
+        MailMe.getInstance().getDataStoreHandler().getPlayerMailBoxes().put(location, getUuid());
 
         tryAddToTask(Bukkit.getPlayer(uuid));
     }
@@ -154,7 +167,9 @@ public final class PlayerData {
         OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
         if (player.isOnline() && notify) {
             Player p = (Player) player;
-            p.sendMessage(String.format(MailMe.getInstance().getLocale().getMessage(getLang(), "notify.received"), Bukkit.getOfflinePlayer(mail.getSender()).getName()));
+            Locale locale = MailMe.getInstance().getLocale();
+            String sender = mail.isAnonymous() ? locale.getMessage(getLang(), "mail.anonymous") : mail.isServer() ? locale.getMessage(getLang(), "mail.server") : mail.getSender() == null ? locale.getMessage(getLang(), "mail.unknown") : Bukkit.getOfflinePlayer(mail.getSender()).getName();
+            p.sendMessage(String.format(MailMe.getInstance().getLocale().getMessage(getLang(), "notify.received"), sender));
         }
 
         tryAddToTask(player);
@@ -209,6 +224,7 @@ public final class PlayerData {
      */
     public void update() {
         Bukkit.getScheduler().runTaskAsynchronously(MailMe.getInstance(), () ->
-            Utils.writeJson(new File(MailMe.getInstance().getDataFolder() + "/playerdata/" + uuid.toString() + ".json"), this));
+                Utils.writeJson(new File(MailMe.getInstance().getDataFolder() + "/playerdata/" + uuid.toString() + ".json"), this));
+
     }
 }

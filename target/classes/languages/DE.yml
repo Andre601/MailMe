@@ -9,6 +9,7 @@ cmd:
   mail-unread: "@prefix &eDu hast ungelesene Nachrichten!"
   invalid-preset-key: "@prefix &eUngültige voreingestellte Taste! Überprüfen Sie Ihre config.yml auf gültige Werte"
   vault-insufficient-funds: "@prefix &eUnzureichende Mittel!"
+  unknown-player: "@prefix &eUnbekannter Spieler oder Spieler ist noch nicht beigetreten!"
 text:
   format:
     - "&8< &eNachrict &8>"
@@ -32,6 +33,9 @@ mail:
   message: "@prefix Was soll die Nachricht sagen?"
   sound-input: "@prefix Welchen Sound möchtest du gerne spielen? Gültige Sounds kannst du hier finden: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Sound.html"
   no-space: "@prefix Sie haben keinen Platz in Ihrem Inventar, um dies zu beanspruchen!"
+  unknown: "Unbekannt"
+  anonymous: "Anonym"
+  server: "Server"
 
 mailbox:
   not-chest: "@prefix Deine Mailbox muss eine Truhe sein!"
@@ -57,6 +61,15 @@ gui:
 
 
   search: "Schreibe den Namen des Spielers, welchen du gerne finden willst"
+  send:
+    title: "&bMail senden"
+    material: FEATHER
+    amount: 1
+    glow: true
+    lore:
+      - "&7Klicken Sie darauf"
+      - "&7öffnet den Mail Builder"
+      - "&7speisekarte!"
   mail:
     title: "&7Von: &b@sender"
     lore:
@@ -112,6 +125,12 @@ gui:
     glow: true
     skull-texture: ""
   choose:
+    send-anonymously:
+      title: "&aAnonym senden"
+      material: EMERALD
+      amount: 1
+      lore:
+        - ""
     message:
       title: "&8[&eTextnachricht&8]"
       material: PAPER

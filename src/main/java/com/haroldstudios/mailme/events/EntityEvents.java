@@ -20,9 +20,9 @@ import com.google.gson.reflect.TypeToken;
 import com.haroldstudios.mailme.MailMe;
 import com.haroldstudios.mailme.datastore.PlayerData;
 import com.haroldstudios.mailme.mail.Mail;
+import com.haroldstudios.mailme.mail.MailBuilder;
 import com.haroldstudios.mailme.utility.Utils;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -30,7 +30,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.hamcrest.core.Is;
 
 import java.lang.reflect.Type;
 import java.util.Collections;
@@ -55,12 +54,13 @@ public class EntityEvents implements Listener {
                 if (Utils.isValidPresetKey(plugin, welcomeKey)) {
                     ConfigurationSection presets = plugin.getConfig().getConfigurationSection("presets");
                     String preset = presets.getString(welcomeKey);
-                    Type token = new TypeToken<Mail>() {}.getType();
+                    Type token = new TypeToken<Mail>() {
+                    }.getType();
                     Mail mail = MailMe.GSON.fromJson(preset, token);
                     mail.clearRecipients();
-                    mail.addRecipients(Collections.singletonList(e.getPlayer()));
+                    mail.addRecipients(Collections.singletonList(e.getPlayer().getUniqueId()));
 
-                    Bukkit.getScheduler().runTask(plugin, mail::sendAsAdmin); //TODO works?
+                    Bukkit.getScheduler().runTask(plugin, mail::sendAsServer);
                 }
             }
 
@@ -70,6 +70,11 @@ public class EntityEvents implements Listener {
                 e.getPlayer().sendMessage(plugin.getLocale().getMessage(data.getLang(), "cmd.mail-unread"));
             }
 
+            if (data.getMailBox() == null) {
+                data.setMailBox(MailMe.getInstance().getDataStoreHandler().defaultLocation);
+            }
+
+            // Just in case above code does an oopsie / default location is not set.
             if (data.getMailBox() != null) {
                 MailMe.playerList.add(e.getPlayer());
             }
@@ -88,16 +93,29 @@ public class EntityEvents implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onInteract(PlayerInteractEvent e) {
-        if (e.getClickedBlock() == null || !e.getClickedBlock().getType().equals(Material.CHEST)) return;
+
+        if (e.getClickedBlock() == null)
+            return;
+
+        if (plugin.getDataStoreHandler().getValidMailBoxMaterials() != null) {
+             if (!plugin.getDataStoreHandler().getValidMailBoxMaterials().contains(e.getClickedBlock().getType())) {
+                 return;
+             }
+        }
 
         Player player = e.getPlayer();
         PlayerData data = plugin.getDataStoreHandler().getPlayerData(player);
 
-        if (data == null || data.getMailBox() == null || !data.getMailBox().equals(e.getClickedBlock().getLocation()))
+        if (data != null && data.getMailBox() != null && data.getMailBox().equals(e.getClickedBlock().getLocation())) {
+            e.setCancelled(true);
+            plugin.getCmds().read(player);
             return;
+        }
+
+        if (!plugin.getDataStoreHandler().getPlayerMailBoxes().containsKey(e.getClickedBlock().getLocation())) return;
 
         e.setCancelled(true);
-        plugin.getCmds().read(player);
+        plugin.getGuiHandler().getChooseTypeGui().open(player, new MailBuilder().setSender(player.getUniqueId()).addRecipient(plugin.getDataStoreHandler().getPlayerMailBoxes().get(e.getClickedBlock().getLocation())));
     }
 
 }

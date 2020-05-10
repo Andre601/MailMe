@@ -9,6 +9,7 @@ cmd:
   mail-unread: "@prefix Vous avez du courrier non lu!"
   invalid-preset-key: "@prefix &eClé prédéfinie invalide! Vérifiez votre config.yml pour les valeurs valides"
   vault-insufficient-funds: "@prefix &eFonds insuffisants!"
+  unknown-player: "prefix &eUn joueur inconnu ou un joueur ne s'est pas encore joint!"
 
 text:
   format:
@@ -33,6 +34,9 @@ mail:
   message: "@prefix Qu’aimeriez-vous que le message dise??"
   sound-input: "@prefix Quel son aimeriez-vous jouer ? Trouvez des sons valides ici: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Sound.html"
   no-space: "@prefix Vous n'avez pas d'espace dans votre inventaire pour le réclamer!"
+  unknown: "Inconnue"
+  anonymous: "Anonyme"
+  server: "Server"
 
 mailbox:
   not-chest: "@prefix Votre boîte aux lettres doit être un coffre!"
@@ -58,6 +62,15 @@ gui:
 
 
   search: "Écrivez le nom du joueur que vous souhaitez trouver"
+  send:
+    title: "&bEnvoyer un mail"
+    material: FEATHER
+    amount: 1
+    glow: true
+    lore:
+      - "&7Cliquer dessus"
+      - "&7ouvrira le générateur de courrier"
+      - "&7menu!"
   mail:
     title: "&7Courrier à partir de: &b@sender"
     lore:
@@ -113,6 +126,12 @@ gui:
     glow: true
     skull-texture: ""
   choose:
+    send-anonymously:
+      title: "&aEnvoyer anonymement"
+      material: EMERALD
+      amount: 1
+      lore:
+        - ""
     message:
       title: "&8[&eCourrier message&8]"
       material: PAPER

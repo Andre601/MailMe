@@ -21,14 +21,20 @@ import com.haroldstudios.mailme.utility.Locale;
 import com.haroldstudios.mailme.utility.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.jetbrains.annotations.Nullable;
 
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class DataStoreHandler {
 
@@ -36,6 +42,8 @@ public final class DataStoreHandler {
     private final MailMe plugin;
     /* Location of default mailbox location */
     public Location defaultLocation;
+    @Nullable public List<Material> mailboxMaterials = new ArrayList<>();
+    private Map<Location, UUID> playerMailBoxes = new HashMap<>();
 
     public DataStoreHandler(MailMe plugin) {
         this.plugin = plugin;
@@ -44,6 +52,38 @@ public final class DataStoreHandler {
         int y = plugin.getConfig().getInt("default-mailbox.y");
         int z = plugin.getConfig().getInt("default-mailbox.z");
         defaultLocation = new Location(Bukkit.getWorld(world),x,y,z);
+
+        if (plugin.getConfig().getBoolean("restricted-mailboxes")) {
+            for (String each : plugin.getConfig().getStringList("valid-mailboxes")) {
+                Material material;
+                try {
+                    material = Material.valueOf(each);
+                } catch (IllegalArgumentException e) {
+                    plugin.getLogger().log(Level.WARNING, "Invalid MailBox Type Material: " + each);
+                    return;
+                }
+                mailboxMaterials.add(material);
+            }
+        } else {
+            // Removes list
+            mailboxMaterials = null;
+        }
+
+        try (Stream<Path> walk = Files.walk(Paths.get(MailMe.getInstance().getDataFolder() + "/playerdata"))) {
+            List<String> result = walk.map(Path::toString)
+                    .filter(f -> f.endsWith(".json")).collect(Collectors.toList());
+
+            result.forEach(file -> {
+                PlayerData data = getTmpFromFile(new File(file));
+                Location mailbox = data.getMailBox();
+                if (mailbox == null) return;
+
+                playerMailBoxes.put(mailbox, data.getUuid());
+            });
+
+        } catch (IOException exception) {
+            MailMe.getInstance().debug("Failed to send as admin: " + exception.getMessage());
+        }
     }
 
     public PlayerData getPlayerData(OfflinePlayer player) {
@@ -59,6 +99,10 @@ public final class DataStoreHandler {
     public void forceSetPlayerData(PlayerData data) {
         if (playerData.containsKey(data.getUuid()))
             playerData.replace(data.getUuid(), data);
+    }
+
+    public List<Material> getValidMailBoxMaterials() {
+        return mailboxMaterials;
     }
 
     public PlayerData getTmpFromFile(File file) {
@@ -87,7 +131,7 @@ public final class DataStoreHandler {
         }
 
         PlayerData newData = new PlayerData(uuid, Locale.LANG.valueOf(plugin.getConfig().getString("lang")));
-        Utils.writeJson(jsonData, newData);
+        Utils.writeJson(new File(MailMe.getInstance().getDataFolder() + "/playerdata/" + uuid.toString() + ".json"), newData);
         this.playerData.put(uuid, newData);
     }
 
@@ -98,6 +142,10 @@ public final class DataStoreHandler {
      */
     private Location getDefaultMailBoxLocation() {
         return defaultLocation;
+    }
+
+    public Map<Location, UUID> getPlayerMailBoxes() {
+        return playerMailBoxes;
     }
 
     public boolean playerDataExists(UUID uuid) {

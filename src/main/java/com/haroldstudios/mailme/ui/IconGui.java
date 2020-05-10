@@ -31,8 +31,8 @@ public final class IconGui extends PaginationGui {
 
     private final MailMe plugin;
 
-    public IconGui(MailMe plugin, Player player, List<?> items, int page) {
-        super(plugin, player, items, page);
+    public IconGui(MailMe plugin, Player player, List<?> items, int page, MailBuilder builder) {
+        super(plugin, player, items, page, builder);
         this.plugin = plugin;
 
         updateTitlePath(plugin.getLocale().getMessage(getPlayerData().getLang(), "gui.choose-icon-title"));
@@ -45,12 +45,12 @@ public final class IconGui extends PaginationGui {
         GuiItem gi = new GuiItem(stack, event -> {
             event.setCancelled(true);
             if (event.getCursor().getType().equals(Material.AIR)) return;
-            MailBuilder.getMailDraft(getPlayer()).setIcon(new org.bukkit.inventory.ItemStack(event.getCursor()));
-            if (MailBuilder.getMailDraft(getPlayer()).getRecipients().size() > 0) {
-                plugin.getGuiHandler().getChoosePlayerGui(getPlayer()).openSpecificInputGui();
+            getMailBuilder().setIcon(new org.bukkit.inventory.ItemStack(event.getCursor()));
+            if (getMailBuilder().getRecipients().size() > 0) {
+                plugin.getGuiHandler().getChoosePlayerGui(getPlayer(), getMailBuilder()).openInputGui(getMailBuilder());
                 return;
             }
-            plugin.getGuiHandler().getChoosePlayerGui(getPlayer()).open();
+            plugin.getGuiHandler().getChoosePlayerGui(getPlayer(), getMailBuilder()).open();
             GuiHandler.playDingSound(getPlayer());
         });
         List<GuiItem> iconList = new ArrayList<>();
@@ -59,12 +59,12 @@ public final class IconGui extends PaginationGui {
             ItemStack item = (ItemStack) it;
             iconList.add(new GuiItem(item, event -> {
                 event.setCancelled(true);
-                MailBuilder.getMailDraft(getPlayer()).setIcon(item);
-                if (MailBuilder.getMailDraft(getPlayer()).getRecipients().size() > 0) {
-                    plugin.getGuiHandler().getChoosePlayerGui(getPlayer()).openSpecificInputGui();
+                getMailBuilder().setIcon(item);
+                if (getMailBuilder().getRecipients().size() > 0) {
+                    plugin.getGuiHandler().getChoosePlayerGui(getPlayer(), getMailBuilder()).openInputGui(getMailBuilder());
                     return;
                 }
-                plugin.getGuiHandler().getChoosePlayerGui(getPlayer()).open();
+                plugin.getGuiHandler().getChoosePlayerGui(getPlayer(), getMailBuilder()).open();
                 GuiHandler.playDingSound(getPlayer());
             }));
         });
@@ -77,6 +77,6 @@ public final class IconGui extends PaginationGui {
 
     @Override
     public PaginationGui newInstance(int page) {
-        return new IconGui(getPlugin(), getPlayer(), getAllItems(), page);
+        return new IconGui(getPlugin(), getPlayer(), getAllItems(), page, getMailBuilder());
     }
 }

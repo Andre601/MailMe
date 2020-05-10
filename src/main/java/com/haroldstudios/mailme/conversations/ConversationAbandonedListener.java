@@ -16,17 +16,36 @@
 
 package com.haroldstudios.mailme.conversations;
 
-import com.haroldstudios.mailme.mail.Mail;
+import com.haroldstudios.mailme.MailMe;
+import com.haroldstudios.mailme.components.IncompleteBuilderException;
 import com.haroldstudios.mailme.mail.MailBuilder;
 import org.bukkit.conversations.ConversationAbandonedEvent;
-import org.bukkit.entity.Player;
 
 public final class ConversationAbandonedListener implements org.bukkit.conversations.ConversationAbandonedListener {
 
     @Override
     public void conversationAbandoned(ConversationAbandonedEvent abandonedEvent) {
-        Mail mail = (Mail) abandonedEvent.getContext().getSessionData("mail");
-        if (mail != null && !MailBuilder.getMailDraft((Player) abandonedEvent.getContext().getForWhom()).isPreset())
-            mail.sendMail();
+
+        MailBuilder mail = (MailBuilder) abandonedEvent.getContext().getSessionData("mail");
+
+        if (mail == null) {
+            MailMe.getInstance().debug("Mail was null!");
+            return;
+        }
+        // if mail is sent normally
+        if (!mail.isPreset()) {
+            try {
+                mail.build().sendMail();
+            } catch (IncompleteBuilderException e) {
+                MailMe.getInstance().debug(e.getMessage());
+            }
+        } else {
+            try {
+                mail.build();
+            } catch (IncompleteBuilderException e) {
+                MailMe.getInstance().debug(e.getMessage());
+            }
+        }
+
     }
 }

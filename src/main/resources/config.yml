@@ -25,7 +25,7 @@ config-ver: 2
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━▼━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #
 
-  # This is the default global language that is used across the server if one is not selected
+# This is the default global language that is used across the server if one is not selected
 # Default "EN"
 lang: "EN"
 
@@ -60,18 +60,29 @@ icons:
   - MINECART
   - DIAMOND
 
-#                           Default Mailbox Location
+#                                 MailBoxes
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━▼━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #
 
-# Please Note: Here, pings are not unique! Therefore, if a player doesn't have mail at one of these locations,
-# an effect will still show for them.
+# The default mailbox location for everyone!
 
 default-mailbox:
   world: "world"
   x: 0
   y: 0
   z: 0
+
+# This setting removes the restriction to selected mailbox types, allowing any block to be a valid mailbox.
+# Recommended: true
+# If you turn off this setting, performance will be impacted.
+restricted-mailboxes: true
+
+# Here, you may add all variations of mailboxes you'd like to add. In this example, a player can only set a mailbox to be a chest
+#valid-mailboxes:
+#  - CHEST
+
+valid-mailboxes:
+  - CHEST
 
 #                           Preset Mail for sending
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━▼━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

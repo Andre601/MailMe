@@ -18,6 +18,7 @@ package com.haroldstudios.mailme.ui;
 
 import com.haroldstudios.mailme.MailMe;
 
+import com.haroldstudios.mailme.mail.MailBuilder;
 import com.haroldstudios.mailme.utility.Locale;
 import com.haroldstudios.mailme.utility.Utils;
 import me.mattstudios.mfgui.gui.components.ItemBuilder;
@@ -35,22 +36,22 @@ public final class GuiHandler {
 
     private final MailMe plugin;
     private final ChooseTypeGui chooseTypeGui;
-    private List<ItemStack> icons = new ArrayList<>();
+    private final List<ItemStack> icons = new ArrayList<>();
 
     public GuiHandler(MailMe plugin) {
         this.plugin = plugin;
         this.chooseTypeGui = new ChooseTypeGui(plugin);
 
         List<String> section = plugin.getConfig().getStringList("icons");
-        section.forEach(icon -> icons.add(new ItemBuilder(new ItemStack(Material.valueOf(icon))).glow().build()));
+        section.forEach(icon -> icons.add(new ItemBuilder(new ItemStack(Material.valueOf(icon))).glow(true).build()));
     }
 
-    public IconGui getIconGui(Player player) {
-        return new IconGui(plugin, player, icons, 0);
+    public IconGui getIconGui(Player player, MailBuilder builder) {
+        return new IconGui(plugin, player, icons, 0, builder);
     }
 
-    public ChoosePlayerGui getChoosePlayerGui(Player player) {
-        return new ChoosePlayerGui(plugin, player, new ArrayList<>(Bukkit.getOnlinePlayers()), 0);
+    public ChoosePlayerGui getChoosePlayerGui(Player player, MailBuilder builder) {
+        return new ChoosePlayerGui(plugin, player, new ArrayList<>(Bukkit.getOnlinePlayers()), 0, builder);
     }
 
     public static ItemStack getPrevious(Locale locale, Locale.LANG lang) {
@@ -81,6 +82,10 @@ public final class GuiHandler {
         return Utils.getItemStack(locale.getConfigurationSection(lang, "gui.continue"));
     }
 
+    public static ItemStack getSend(Locale locale, Locale.LANG lang) {
+        return Utils.getItemStack(locale.getConfigurationSection(lang, "gui.send"));
+    }
+
     public static void playUISound(Player player) {
         player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1F, 1F);
     }
@@ -98,7 +103,7 @@ public final class GuiHandler {
         return chooseTypeGui;
     }
 
-    public ItemInputGui getItemInputGui(Player player) {
-        return new ItemInputGui(plugin, player);
+    public ItemInputGui getItemInputGui(Player player, MailBuilder builder) {
+        return new ItemInputGui(plugin, player, builder);
     }
 }

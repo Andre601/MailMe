@@ -18,6 +18,7 @@ package com.haroldstudios.mailme.ui;
 
 import com.haroldstudios.mailme.MailMe;
 import com.haroldstudios.mailme.datastore.PlayerData;
+import com.haroldstudios.mailme.mail.MailBuilder;
 import com.haroldstudios.mailme.utility.Locale;
 import com.haroldstudios.mailme.utility.Pagination;
 import com.haroldstudios.mailme.utility.Utils;
@@ -33,6 +34,7 @@ import java.util.List;
 abstract class PaginationGui {
 
     private final MailMe plugin;
+    private final MailBuilder mailBuilder;
     private final List<Object> allItems = new ArrayList<>();
     private final PlayerData data;
     private final Player player;
@@ -41,7 +43,8 @@ abstract class PaginationGui {
     private final Gui gui;
     private final int currentPage;
 
-    PaginationGui(MailMe plugin, Player player, List<?> items, int currentPage) {
+    PaginationGui(MailMe plugin, Player player, List<?> items, int currentPage, MailBuilder mailBuilder) {
+        this.mailBuilder = mailBuilder;
         this.plugin = plugin;
         this.player = player;
         this.data = plugin.getDataStoreHandler().getPlayerData(player);
@@ -76,6 +79,10 @@ abstract class PaginationGui {
 
     protected void setNoResults() {
         gui.setItem(2,5, new GuiItem(GuiHandler.getNoResults(getPlugin().getLocale(), data.getLang()), e -> e.setCancelled(true)));
+    }
+
+    protected MailBuilder getMailBuilder() {
+        return mailBuilder;
     }
 
     protected List<?> getPage(int page) {

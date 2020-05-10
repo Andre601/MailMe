@@ -19,7 +19,6 @@ com/haroldstudios/mailme/components/hooks/PlaceholderAPIExpansion.class
 com/haroldstudios/mailme/ui/ChoosePlayerGui.class
 com/haroldstudios/mailme/command/MailCmd$1.class
 com/haroldstudios/mailme/utility/NMSReflection.class
-com/haroldstudios/mailme/mail/MailBuilder$Builder$1.class
 com/haroldstudios/mailme/mail/types/MailMessages.class
 com/haroldstudios/mailme/command/MailCmd.class
 com/haroldstudios/mailme/events/EntityEvents$1.class
@@ -29,10 +28,9 @@ com/haroldstudios/mailme/conversations/PlayerSearch.class
 com/haroldstudios/mailme/mail/Mail.class
 com/haroldstudios/mailme/events/EntityEvents.class
 com/haroldstudios/mailme/ui/ItemInputGui.class
-com/haroldstudios/mailme/conversations/SoundInput.class
 com/haroldstudios/mailme/ui/ChoosePlayerGui$1.class
 com/haroldstudios/mailme/utility/Locale$LANG.class
-com/haroldstudios/mailme/mail/MailBuilder$Builder.class
+com/haroldstudios/mailme/mail/MailBuilder$2.class
 com/haroldstudios/mailme/ui/MailGui.class
 com/haroldstudios/mailme/mail/Mail$MailType.class
 com/haroldstudios/mailme/mail/types/MailItems.class

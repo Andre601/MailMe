@@ -33,40 +33,8 @@ import java.util.UUID;
 @SuppressWarnings({"unused"})
 public final class MailLocation extends Mail {
 
-    private double x,y,z;
-    private String world;
-
-    /**
-     *
-     * @param icon Icon ItemStack
-     * @param message Message mail
-     * @param recipients List of OfflinePlayers
-     */
-    public MailLocation(ItemStack icon, List<OfflinePlayer> recipients, Location message) {
-        this(icon, recipients, message, null);
-    }
-
-    /**
-     *
-     * @param icon Icon ItemStack
-     * @param recipients List of OfflinePlayers
-     * @param loc Message mail
-     * @param sender Sender of Mail
-     */
-    public MailLocation(ItemStack icon,  List<OfflinePlayer> recipients, Location loc, UUID sender) {
-        this(icon, new Date(), recipients, loc, sender);
-    }
-
-    /**
-     *
-     * @param icon Icon ItemStack
-     * @param date Date to stamp onto mail
-     * @param recipients List of OfflinePlayers
-     * @param loc Message mail
-     */
-    public MailLocation(ItemStack icon, Date date, List<OfflinePlayer> recipients, Location loc) {
-        this(icon, date, recipients, loc,null);
-    }
+    private final double x,y,z;
+    private final String world;
 
     /**
      *
@@ -76,8 +44,8 @@ public final class MailLocation extends Mail {
      * @param loc Message mail
      * @param sender Sender of Mail
      */
-    public MailLocation(ItemStack icon, Date date, List<OfflinePlayer> recipients, Location loc, UUID sender) {
-        super(icon, date);
+    public MailLocation(ItemStack icon, Date date, List<UUID> recipients, Location loc, UUID sender, boolean anonymous, boolean server) {
+        super(icon, date, anonymous, server);
         super.setSender(sender);
         super.addRecipients(recipients);
         this.x = loc.getX();
@@ -103,7 +71,7 @@ public final class MailLocation extends Mail {
 
     @Override
     public Mail clone() {
-        MailLocation mail = new MailLocation(getIcon(), getDate(), Collections.emptyList(), new Location(Bukkit.getWorld(world), x,y,z), getSender());
+        MailLocation mail = new MailLocation(getIcon(), getDate(), Collections.emptyList(), new Location(Bukkit.getWorld(world), x,y,z), getSender(), isAnonymous(), isServer());
         mail.addRecipientsUUID(getRecipients());
         return mail;
     }

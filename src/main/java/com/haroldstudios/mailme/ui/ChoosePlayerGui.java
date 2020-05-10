@@ -33,8 +33,8 @@ import java.util.Objects;
 
 public final class ChoosePlayerGui extends PaginationGui {
 
-    public ChoosePlayerGui(MailMe plugin, Player player, List<?> items, int currentPage) {
-        super(plugin, player, items, currentPage);
+    public ChoosePlayerGui(MailMe plugin, Player player, List<?> items, int currentPage, MailBuilder builder) {
+        super(plugin, player, items, currentPage, builder);
 
         applyNavBut(currentPage);
         getGui().setItem(2,2, GuiHandler.getLoading(getPlugin().getLocale(), getPlayerData().getLang()));
@@ -42,21 +42,22 @@ public final class ChoosePlayerGui extends PaginationGui {
 
         getGui().setItem(3,9,new GuiItem(GuiHandler.getSearchIcon(getPlugin().getLocale(), getPlayerData().getLang()), event -> {
             event.setCancelled(true);
-            getPlugin().getSearchPlayerFactory().buildConversation(getPlayer()).begin();
+            getPlugin().getSearchPlayerFactory(getMailBuilder()).buildConversation(getPlayer()).begin();
             getGui().close(getPlayer());
             GuiHandler.playUISound(getPlayer());
         }));
 
         getGui().setItem(4,9, new GuiItem(removeFilter(), event -> {
             event.setCancelled(true);
-            getPlugin().getGuiHandler().getChoosePlayerGui(getPlayer()).open();
+            getPlugin().getGuiHandler().getChoosePlayerGui(getPlayer(), getMailBuilder()).open();
             GuiHandler.playUISound(getPlayer());
         }));
 
         getGui().setItem(5,9,new GuiItem(GuiHandler.getContinue(getPlugin().getLocale(), getPlayerData().getLang()), event -> {
             event.setCancelled(true);
-            if (!MailBuilder.getMailDraft(getPlayer()).getRecipients().isEmpty()) {
-                openSpecificInputGui();
+            if (!getMailBuilder().getRecipients().isEmpty()) {
+                // Opens next menu
+                openInputGui(getMailBuilder());
                 GuiHandler.playUISound(getPlayer());
             }
         }));
@@ -67,27 +68,26 @@ public final class ChoosePlayerGui extends PaginationGui {
 
         getGui().open(getPlayer());
 
-         Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
             List<GuiItem> heads = new ArrayList<>();
-            MailBuilder.Builder draft = MailBuilder.getMailDraft(getPlayer());
             int slot = 1;
             for (Object each : getPage(getCurrentPage())) {
                 OfflinePlayer p = (OfflinePlayer) each;
                 if (p.hasPlayedBefore() || p.isOnline()) {
                     ItemBuilder builder = new ItemBuilder(Material.PLAYER_HEAD).setSkullOwner(p).setName(ChatColor.AQUA + p.getName());
 
-                    if (draft.getRecipients().contains(p)) {
-                        getGui().setItem(slot, new GuiItem(new ItemBuilder(Material.EMERALD).glow().build(), e -> e.setCancelled(true)));
+                    if (getMailBuilder().getRecipients().contains(p)) {
+                        getGui().setItem(slot, new GuiItem(new ItemBuilder(Material.EMERALD).glow(true).build(), e -> e.setCancelled(true)));
                     }
                     int finalSlot = slot;
                     heads.add(new GuiItem(builder.build(), event -> {
                         event.setCancelled(true);
-                        if (draft.getRecipients().contains(p)) {
-                            draft.removeRecipient(p);
+                        if (getMailBuilder().getRecipients().contains(p)) {
+                            getMailBuilder().removeRecipient(p);
                             getGui().setItem(finalSlot, new GuiItem(new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE).build(), e -> e.setCancelled(true)));
                         } else {
-                            draft.addRecipient(p);
-                            getGui().setItem(finalSlot, new GuiItem(new ItemBuilder(Material.EMERALD).glow().build(), e -> e.setCancelled(true)));
+                            getMailBuilder().addRecipient(p);
+                            getGui().setItem(finalSlot, new GuiItem(new ItemBuilder(Material.EMERALD).glow(true).build(), e -> e.setCancelled(true)));
                         }
                         GuiHandler.playDingSound(getPlayer());
                         getGui().update();
@@ -110,21 +110,23 @@ public final class ChoosePlayerGui extends PaginationGui {
         });
     }
 
-    public void openSpecificInputGui() {
-        MailBuilder.Builder builder = MailBuilder.getMailDraft(getPlayer());
+    @Override
+    public PaginationGui newInstance(int page) {
+        return new ChoosePlayerGui(getPlugin(), getPlayer(), new ArrayList<>(Bukkit.getOnlinePlayers()), page, getMailBuilder());
+    }
+
+    public void openInputGui(MailBuilder builder) {
         try {
-            switch (builder.getMailType()) {
+            // Asserted not null in previous menu
+            switch (Objects.requireNonNull(builder.getMailType())) {
 
                 case MAIL_MESSAGE:
-                    getPlayer().closeInventory();
-                    getPlugin().getConversationFactory().buildConversation(getPlayer()).begin();
-                    break;
-                case MAIL_ITEM:
-                    getPlugin().getGuiHandler().getItemInputGui(getPlayer()).open();
-                    break;
                 case MAIL_SOUND:
                     getPlayer().closeInventory();
-                    getPlugin().getSoundInputFactory().buildConversation(getPlayer()).begin();
+                    getPlugin().getInputFactory(getMailBuilder()).buildConversation(getPlayer()).begin();
+                    break;
+                case MAIL_ITEM:
+                    getPlugin().getGuiHandler().getItemInputGui(getPlayer(), builder).open();
                     break;
                 case MAIL_LOCATION:
                     getPlayer().closeInventory();
@@ -135,10 +137,5 @@ public final class ChoosePlayerGui extends PaginationGui {
         } catch (IncompleteBuilderException ibe) { // Shouldn't EVER hit here
             ibe.printStackTrace();
         }
-    }
-
-    @Override
-    public PaginationGui newInstance(int page) {
-        return new ChoosePlayerGui(getPlugin(), getPlayer(), new ArrayList<>(Bukkit.getOnlinePlayers()), page);
     }
 }

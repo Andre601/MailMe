@@ -7,6 +7,7 @@ description: This plugin allows players to transfer items, messages, sounds, loc
 softdepend:
   - PlaceholderAPI
   - Vault
+  - Multiverse
 
 commands:
   mail:

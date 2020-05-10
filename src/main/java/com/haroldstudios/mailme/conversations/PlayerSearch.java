@@ -18,6 +18,7 @@ package com.haroldstudios.mailme.conversations;
 
 import com.haroldstudios.mailme.MailMe;
 import com.haroldstudios.mailme.datastore.PlayerData;
+import com.haroldstudios.mailme.mail.MailBuilder;
 import com.haroldstudios.mailme.ui.ChoosePlayerGui;
 import com.haroldstudios.mailme.ui.GuiHandler;
 import me.mattstudios.mfgui.gui.guis.Gui;
@@ -33,6 +34,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public final class PlayerSearch extends StringPrompt {
+
+    private final MailBuilder mail;
+
+    public PlayerSearch(MailBuilder mail) {
+        this.mail = mail;
+    }
+
     @Override
     public String getPromptText(ConversationContext context) {
         PlayerData data = MailMe.getInstance().getDataStoreHandler().getPlayerData((Player) context.getForWhom());
@@ -53,13 +61,13 @@ public final class PlayerSearch extends StringPrompt {
             Bukkit.getScheduler().runTask(MailMe.getInstance(), () -> {
 
                 if (search == null) {
-                    Gui gui = new ChoosePlayerGui(MailMe.getInstance(), player, Collections.emptyList(), 0).getGui();
+                    Gui gui = new ChoosePlayerGui(MailMe.getInstance(), player, Collections.emptyList(), 0, mail).getGui();
                     gui.setItem(2, 5, new GuiItem(GuiHandler.getSearchIcon(MailMe.getInstance().getLocale(), data.getLang())));
                     gui.open(player);
                     return;
                 }
 
-                new ChoosePlayerGui(MailMe.getInstance(), player, new ArrayList<>(Collections.singletonList(search)), 0).open();
+                new ChoosePlayerGui(MailMe.getInstance(), player, new ArrayList<>(Collections.singletonList(search)), 0, mail).open();
             });
         });
 

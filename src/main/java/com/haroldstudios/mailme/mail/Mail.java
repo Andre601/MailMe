@@ -34,14 +34,18 @@ public abstract class Mail implements Cloneable {
 
     private ItemStack icon;
     private Date date;
-    private List<UUID> recipients = new ArrayList<>();
+    private final List<UUID> recipients = new ArrayList<>();
     private boolean read = false;
     private boolean reply = false;
     private UUID sender;
     private final int delay;
+    private final boolean anonymous;
+    private final boolean server;
 
-    public Mail(ItemStack icon, Date date) {
+    public Mail(ItemStack icon, Date date, boolean anonymous, boolean server) {
         this.icon = icon;
+        this.anonymous = anonymous;
+        this.server = server;
         this.date = date;
         delay = MailMe.getInstance().getConfig().getInt("delay");
     }
@@ -101,6 +105,8 @@ public abstract class Mail implements Cloneable {
         return read;
     }
 
+    public boolean isServer() { return server; }
+
     /**
      * Has mail be replied to
      *
@@ -110,6 +116,8 @@ public abstract class Mail implements Cloneable {
     public boolean isReply() {
         return reply;
     }
+
+    public boolean isAnonymous() { return anonymous; }
 
     /**
      * Gets the sender of the mail
@@ -176,8 +184,8 @@ public abstract class Mail implements Cloneable {
      *
      * @param players List of Players
      */
-    public void addRecipients(List<OfflinePlayer> players) {
-        recipients.addAll(players.stream().map(OfflinePlayer::getUniqueId).collect(Collectors.toList()));
+    public void addRecipients(List<UUID> players) {
+        recipients.addAll(players);
     }
 
     /**
@@ -203,9 +211,13 @@ public abstract class Mail implements Cloneable {
      */
     public void sendMail() {
 
-        UUID sender = getSender();
         List<UUID> recipients = getRecipients();
         List<UUID> newList = new ArrayList<>(recipients);
+
+        if (getSender() == null) {
+            sendAsServer();
+            return;
+        }
 
         PlayerData senderData = MailMe.getInstance().getDataStoreHandler().getPlayerData(sender);
 
@@ -244,26 +256,28 @@ public abstract class Mail implements Cloneable {
             return;
         }
 
-
-        Bukkit.getPlayer(sender).sendMessage(String.format(MailMe.getInstance().getLocale().getMessage(senderData.getLang(), "notify.sent"), newestList));
+        try {
+            if (Bukkit.getPlayer(sender) != null || sender.equals(Bukkit.getPlayer(sender).getUniqueId())) {
+                Bukkit.getPlayer(sender).sendMessage(String.format(MailMe.getInstance().getLocale().getMessage(senderData.getLang(), "notify.sent"), newestList));
+            }
+        } catch (NullPointerException ignore) { }
         newList.forEach(player -> MailMe.getInstance().getDataStoreHandler().getPlayerData(player).addMail(this.clone()));
 
-        MailBuilder.mailDrafts.remove(Bukkit.getPlayer(sender));
     }
 
     /**
      * Sends the mail as if came from server / admin
      * (Bypasses Checks and Removes Sender)
      */
-    public void sendAsAdmin() {
+    public void sendAsServer() {
         this.date = new Date();
 
         getRecipients().forEach(player -> {
 
             PlayerData data = MailMe.getInstance().getDataStoreHandler().getPlayerData(player);
-            data.addMail(this.clone());
+            Mail mail = this.clone();
+            data.addMail(mail);
 
-            // TODO run Async? TASKCHAIN ON MOST METHODS? E.G SENDING
             MailMe.getInstance().getDataStoreHandler().forceSetPlayerData(data);
         });
 
@@ -284,10 +298,15 @@ public abstract class Mail implements Cloneable {
         builder.event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/mailme reply"));
         builder.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(MailMe.getInstance().getLocale().getMessage("text.hover")).create()));
 
+        OfflinePlayer sendr = Bukkit.getOfflinePlayer(getSender());
+
         for (String each : msgs) {
             String t = each + "\n";
             t = t.replaceAll("%time%", getDate().toString());
-            t = t.replaceAll("%sender%", sender);
+            if (isAnonymous()) {
+                t = t.replaceAll("%sender%", "???");
+            }
+            t = t.replaceAll("%sender%", getSender() == null ? "???" : !sendr.hasPlayedBefore() ?  "???": sendr.getName() == null ? "???" : sendr.getName());
             if (!t.contains("%contents%")) {
                 builder.append(new TextComponent(t));
                 continue;

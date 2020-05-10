@@ -18,6 +18,8 @@ package com.haroldstudios.mailme.command;
 
 import com.google.gson.reflect.TypeToken;
 import com.haroldstudios.mailme.MailMe;
+import com.haroldstudios.mailme.components.IncompleteBuilderException;
+import com.haroldstudios.mailme.datastore.DataStoreHandler;
 import com.haroldstudios.mailme.datastore.PlayerData;
 import com.haroldstudios.mailme.mail.Mail;
 import com.haroldstudios.mailme.mail.MailBuilder;
@@ -33,6 +35,7 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -41,6 +44,7 @@ import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,13 +64,12 @@ public final class MailCmd extends CommandBase {
     private final static String BASE_PERM = "mailme.base.";
     private final static String ADMIN_PERM = "mailme.admin";
 
-    private MailMe plugin;
+    private final MailMe plugin;
 
     public MailCmd(MailMe plugin) {
         this.plugin = plugin;
     }
 
-    @Permission(BASE_PERM)
     @Default
     public void execute(Player player) {
         player.sendMessage(plugin.getLocale().getLore(plugin.getDataStoreHandler().getPlayerData(player).getLang(), "help"));
@@ -101,10 +104,82 @@ public final class MailCmd extends CommandBase {
     }
 
     @Permission(BASE_PERM + "send")
+    @SubCommand("reply")
+    public void reply(Player player, String pl) {
+
+        PlayerData data = plugin.getDataStoreHandler().getPlayerData(player);
+
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            OfflinePlayer target = Bukkit.getOfflinePlayer(pl);
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                if (target == null || !target.hasPlayedBefore()) {
+                    plugin.getLocale().getMessage(data.getLang(), "cmd.unknown-player");
+                    return;
+                }
+
+
+                plugin.getGuiHandler().getChooseTypeGui().open(player, new MailBuilder().addRecipient(target));
+            });
+        });
+    }
+
+
+    @Permission(BASE_PERM + "send")
     @SubCommand("send")
-    @Alias("reply")
-    public void send(Player player) {
-        plugin.getGuiHandler().getChooseTypeGui().open(player);
+    // /mailme send [playername] [type] [contents]
+    public void send(CommandSender sender, String[] args) {
+        // If just sending via gui
+        if (args.length == 1) {
+            if (!(sender instanceof Player)) {
+                sender.sendMessage("No console! :(");
+                return;
+            }
+            plugin.getGuiHandler().getChooseTypeGui().open((Player) sender, new MailBuilder());
+            return;
+        }
+
+        // If sending via commands
+        if (!(args.length >= 4)) {
+            throw new SyntaxError();
+        }
+
+        plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
+            Mail.MailType type;
+            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
+            String contents = String.join(" ", Arrays.copyOfRange(args, 3, args.length));
+            
+            boolean server = !(sender instanceof Player);
+
+            try {
+                type = Mail.MailType.valueOf(args[2].toUpperCase());
+            } catch (IllegalArgumentException e) {
+                sender.sendMessage("§cSyntax Error!");
+                return;
+            }
+
+            plugin.getServer().getScheduler().runTask(plugin, () -> {
+
+                Mail mail;
+                try {
+                    if (server) {
+                        // Sets sender to receiver.
+                        mail = new MailBuilder().setServerSender(true).setMailType(Mail.MailType.MAIL_MESSAGE).setIcon(new ItemStack(Material.RED_BANNER)).addRecipient(offlinePlayer).setMessage(contents).build();
+                    } else {
+                        mail = new MailBuilder().setSender(((Player) sender).getUniqueId()).setMailType(Mail.MailType.MAIL_MESSAGE).setAnonymous(false).setIcon(new ItemStack(Material.RED_BANNER)).addRecipient(offlinePlayer).setMessage(contents).build();
+                    }
+                } catch (IncompleteBuilderException e) {
+                    e.printStackTrace();
+                    return;
+                }
+
+                mail.sendMail();
+
+            });
+        });
+
+
+
+
     }
 
     @Permission(BASE_PERM + "text")
@@ -144,10 +219,23 @@ public final class MailCmd extends CommandBase {
         if (string.equalsIgnoreCase("set")) {
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 Block chest = player.getTargetBlock(null, 10);
-                if (!chest.getType().equals(Material.CHEST)) {
+                if (chest == null || chest.getType() == null) {
+                    System.out.println("failed 1");
                     player.sendMessage(plugin.getLocale().getMessage(data.getLang(), "mailbox.not-chest"));
                     return;
                 }
+
+                if (plugin.getDataStoreHandler().getValidMailBoxMaterials() != null) {
+                    System.out.println(plugin.getDataStoreHandler().getValidMailBoxMaterials());
+                    if (!plugin.getDataStoreHandler().getValidMailBoxMaterials().contains(chest.getType())) {
+                        System.out.println("failed 2");
+                        System.out.println(chest.getType());
+                        System.out.println(plugin.getDataStoreHandler().getValidMailBoxMaterials().contains(chest.getType()));
+                        player.sendMessage(plugin.getLocale().getMessage(data.getLang(), "mailbox.not-chest"));
+                        return;
+                    }
+                }
+
                 Location loc = chest.getLocation();
 
                 Bukkit.getScheduler().runTask(plugin, () -> plugin.getDataStoreHandler().getPlayerData(player).setMailBox(loc));
@@ -165,6 +253,8 @@ public final class MailCmd extends CommandBase {
 
         PlayerData data = plugin.getDataStoreHandler().getPlayerData(player);
         ConfigurationSection mailboxConfig = plugin.getConfig().getConfigurationSection("default-mailbox");
+        DataStoreHandler store = plugin.getDataStoreHandler();
+        Location oldLocation = store.defaultLocation;
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             Block chest = player.getTargetBlock(null, 10);
@@ -184,6 +274,43 @@ public final class MailCmd extends CommandBase {
             plugin.getDataStoreHandler().defaultLocation = loc;
 
             player.sendMessage(plugin.getLocale().getMessage(data.getLang(), "mailbox.mailbox-set"));
+
+            Bukkit.getScheduler().runTask(plugin, () -> {
+
+                try (Stream<Path> walk = Files.walk(Paths.get(MailMe.getInstance().getDataFolder() + "/playerdata"))) {
+                    List<String> result = walk.map(Path::toString)
+                            .filter(f -> f.endsWith(".json")).collect(Collectors.toList());
+
+                    result.forEach(dataFile -> {
+                        dataFile = new File(dataFile).getName();
+                        UUID uuid = UUID.fromString(dataFile.substring(0, dataFile.lastIndexOf('.')));
+                        // Check if player's data is in our cache at the moment.
+                        boolean exists = store.playerDataExists(uuid);
+
+                        PlayerData playerData = store.getPlayerData(uuid);
+
+                        // If player does not have a mailbox, give them the default one
+                        if (playerData.getMailBox() == null) {
+                            playerData.setMailBox(loc);
+                        } else {
+                            // If the player's old mailbox was a default mailbox, move it to the new location.
+                            if (playerData.getMailBox().equals(oldLocation)) {
+                                playerData.setMailBox(loc);
+                            }
+                        }
+                        // If the data was not in our cache
+                        if (!exists) {
+                            playerData.update();
+                            store.removePlayerData(uuid);
+                        }
+
+                    });
+
+                } catch (IOException exception) {
+                    MailMe.getInstance().debug("Failed to send as admin: " + exception.getMessage());
+                }
+            });
+
         });
     }
 
@@ -225,14 +352,15 @@ public final class MailCmd extends CommandBase {
                 return;
             }
             Player player = (Player) sender;
-            plugin.getGuiHandler().getChooseTypeGui().open(player);
-
+            MailBuilder builder = new MailBuilder();
 
             if (args[2].equalsIgnoreCase("all")) {
-                MailBuilder.getMailDraft(player).addRecipients(Bukkit.getOfflinePlayers());
+                builder.addRecipients(Arrays.stream(Bukkit.getOfflinePlayers()).map(OfflinePlayer::getUniqueId).collect(Collectors.toList()));
             } else {
-                MailBuilder.getMailDraft(player).addRecipient(Bukkit.getOfflinePlayer(args[2]));
+                builder.addRecipient(Bukkit.getOfflinePlayer(args[2]));
             }
+
+            plugin.getGuiHandler().getChooseTypeGui().open(player, builder);
             return;
         }
         // if args length is greater than 2 (has id)
@@ -244,6 +372,7 @@ public final class MailCmd extends CommandBase {
 
         String preset = presets.getString(args[3]);
         Type token = new TypeToken<Mail>() {}.getType();
+        MailMe.getInstance();
         Mail mail = MailMe.GSON.fromJson(preset, token);
 
         List<UUID> recipients = new ArrayList<>();
@@ -267,8 +396,8 @@ public final class MailCmd extends CommandBase {
         }
 
         mail.addRecipientsUUID(recipients);
-        // Send as Administrator
-        mail.sendAsAdmin();
+        // Send as Server
+        mail.sendAsServer();
     }
 
     // Usage /mailme admin preset <name>
@@ -277,12 +406,17 @@ public final class MailCmd extends CommandBase {
 
         Player player = (Player) sender;
         if (args.length < 3) throw new SyntaxError();
-        plugin.getGuiHandler().getChooseTypeGui().open(player);
 
-        MailBuilder.getMailDraft(player)
+        MailBuilder builder = new MailBuilder();
+        builder
+                .setServerSender(true)
                 .setPreset(true)
+                .setAnonymous(false)
                 .setPresetName(args[2])
                 .addRecipient(player);
+
+
+        plugin.getGuiHandler().getChooseTypeGui().open(player, builder);
     }
 
 

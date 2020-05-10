@@ -21,16 +21,17 @@ import com.google.gson.GsonBuilder;
 import com.haroldstudios.mailme.components.hooks.VaultHook;
 import com.haroldstudios.mailme.conversations.*;
 import com.haroldstudios.mailme.events.EntityEvents;
-import com.haroldstudios.mailme.utility.TypeAdapterFactory;
+import com.haroldstudios.mailme.mail.Mail;
+import com.haroldstudios.mailme.mail.MailBuilder;
 import com.haroldstudios.mailme.command.MailCmd;
 import com.haroldstudios.mailme.components.hooks.PlaceholderAPIExpansion;
 import com.haroldstudios.mailme.datastore.DataStoreHandler;
 import com.haroldstudios.mailme.datastore.PlayerData;
-import com.haroldstudios.mailme.mail.Mail;
 import com.haroldstudios.mailme.mail.MailSerializer;
 import com.haroldstudios.mailme.ui.GuiHandler;
 import com.haroldstudios.mailme.utility.Locale;
 
+import com.haroldstudios.mailme.utility.TypeAdapterFactory;
 import com.haroldstudios.mailme.utility.Utils;
 import me.mattstudios.mf.base.CommandManager;
 import org.bstats.bukkit.Metrics;
@@ -53,14 +54,14 @@ import java.util.stream.Collectors;
 
 public final class MailMe extends JavaPlugin {
 
-    /* Gson Instance */
-    public final static Gson GSON = new GsonBuilder()
-                    .setDateFormat("dd-MM-yyyy-hh:mm:ss.SSS")
-                    .enableComplexMapKeySerialization()
-                    .setPrettyPrinting()
-                    .registerTypeAdapter(Mail.class, new MailSerializer<Mail>())
-                     .registerTypeAdapterFactory(new TypeAdapterFactory())
-                    .create();
+    public static Gson GSON = new GsonBuilder()
+            .setDateFormat("dd-MM-yyyy-hh:mm:ss.SSS")
+            .enableComplexMapKeySerialization()
+            .setPrettyPrinting()
+            .registerTypeAdapter(Mail.class, new MailSerializer<Mail>())
+            .registerTypeAdapterFactory(new TypeAdapterFactory())
+            .create();
+
     /* Handlers */
     private Locale locale;
     private GuiHandler uiHandler;
@@ -68,10 +69,7 @@ public final class MailMe extends JavaPlugin {
     private MailCmd mailCmds;
 
     /* Conversation Factory */
-    private ConversationFactory conversationFactory;
     private ConversationFactory searchFactory;
-    private ConversationFactory searchPlayerFactory;
-    private ConversationFactory soundInputFactory;
 
     /* Hooks */
     private VaultHook vaultHook;
@@ -79,23 +77,9 @@ public final class MailMe extends JavaPlugin {
     public static final List<OfflinePlayer> playerList = new ArrayList<>();
 
     private void loadConversations() {
-        this.conversationFactory = new ConversationFactory(this).withModality(true)
-                .withFirstPrompt(new InputPrompt())
-                .withEscapeSequence("cancel").withTimeout(60)
-                .addConversationAbandonedListener(new ConversationAbandonedListener())
-                .thatExcludesNonPlayersWithMessage("Console is not supported by this command");
         this.searchFactory = new ConversationFactory(this).withModality(true)
                 .withFirstPrompt(new SearchInput())
                 .withEscapeSequence("cancel").withTimeout(60)
-                .thatExcludesNonPlayersWithMessage("Console is not supported by this command");
-        this.searchPlayerFactory = new ConversationFactory(this).withModality(true)
-                .withFirstPrompt(new PlayerSearch())
-                .withEscapeSequence("cancel").withTimeout(60)
-                .thatExcludesNonPlayersWithMessage("Console is not supported by this command");
-        this.soundInputFactory = new ConversationFactory(this).withModality(true)
-                .withFirstPrompt(new SoundInput())
-                .withEscapeSequence("cancel").withTimeout(60)
-                .addConversationAbandonedListener(new ConversationAbandonedListener())
                 .thatExcludesNonPlayersWithMessage("Console is not supported by this command");
     }
 
@@ -125,6 +109,8 @@ public final class MailMe extends JavaPlugin {
         commandManager.getCompletionHandler().register("#admin-options", val -> Arrays.asList("send", "preset"));
         commandManager.getCompletionHandler().register("#admin-who", val -> Arrays.asList("<player>", "all"));
         commandManager.getCompletionHandler().register("#admin-id", val -> Collections.singletonList("[name-id]"));
+        commandManager.getCompletionHandler().register("#send-type", val -> Collections.singletonList("MAIL_MESSAGES"));
+        commandManager.getCompletionHandler().register("#contents", val -> Collections.singletonList("[content]]"));
         this.mailCmds = new MailCmd(this);
         commandManager.register(mailCmds);
         commandManager.hideTabComplete(true);
@@ -161,6 +147,7 @@ public final class MailMe extends JavaPlugin {
                     Location loc = data.getMailBox();
 
                     // Ensures mailbox still exists
+                    if (loc.getWorld() == null || loc.getWorld().getBlockAt(loc) == null || loc.getWorld().getBlockAt(loc).getType() == null) return;
                     if (loc.getWorld().getBlockAt(loc).getType() == Material.AIR) {
                         getDataStoreHandler().getPlayerData(player).setMailBox(null);
                         return;
@@ -201,19 +188,22 @@ public final class MailMe extends JavaPlugin {
 
     public DataStoreHandler getDataStoreHandler() { return dataStoreHandler; }
 
-    public ConversationFactory getConversationFactory() {
-        return conversationFactory;
+    public ConversationFactory getInputFactory(MailBuilder builder) {
+        return new ConversationFactory(this).withModality(true)
+                .withFirstPrompt(new InputPrompt(builder))
+                .withEscapeSequence("cancel").withTimeout(300)
+                .addConversationAbandonedListener(new ConversationAbandonedListener())
+                .thatExcludesNonPlayersWithMessage("Console is not supported by this command");
     }
 
     public ConversationFactory getSearchFactory() {
         return searchFactory;
     }
 
-    public ConversationFactory getSearchPlayerFactory() { return searchPlayerFactory; }
-
-    public ConversationFactory getSoundInputFactory() {
-        return soundInputFactory;
-    }
+    public ConversationFactory getSearchPlayerFactory(MailBuilder builder) { return new ConversationFactory(this).withModality(true)
+            .withFirstPrompt(new PlayerSearch(builder))
+            .withEscapeSequence("cancel").withTimeout(300)
+            .thatExcludesNonPlayersWithMessage("Console is not supported by this command"); }
 
     public VaultHook getVaultHook() {
         return vaultHook;

@@ -59,7 +59,7 @@ public final class SearchInput extends StringPrompt {
             return Prompt.END_OF_CONVERSATION;
         }
 
-        List<Mail> mailList = data.getMail().stream().filter(mail -> mail.getSender().equals(search.getUniqueId())).collect(Collectors.toList());
+        List<Mail> mailList = data.getMail().stream().filter(mail -> mail.getSender().equals(search.getUniqueId())).filter(mail -> !mail.isAnonymous()).collect(Collectors.toList());
 
         new MailGui(MailMe.getInstance(), player, mailList, 0).open();
 

@@ -17,7 +17,6 @@
 package com.haroldstudios.mailme.utility;
 
 import com.haroldstudios.mailme.MailMe;
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -73,6 +72,9 @@ public final class Locale {
 
     public String getMessage(LANG lang, String string) {
         String msg = this.yaml.get(lang).getString(string);
+        if (msg == null) {
+            return "Unknown Message! Needs configurating in MailMe's config.yml!";
+        }
         return Utils.colour(msg.replace("@prefix", this.yaml.get(lang).getString("prefix")));
     }
 

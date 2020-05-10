@@ -23,10 +23,8 @@ import com.haroldstudios.mailme.mail.Mail;
 import me.mattstudios.mfgui.gui.components.ItemBuilder;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 import java.io.*;
 import java.lang.reflect.Type;
@@ -73,26 +71,30 @@ public final class Utils {
         ItemBuilder builder = new ItemBuilder(Material.valueOf(section.getString("material")))
                 .setName(colour(section.getString("title")))
                 .setLore(colourList(section.getStringList("lore")).toArray(new String[]{}))
-                .setAmount(section.getInt("amount"));
+                .setAmount(section.getInt("amount"))
+                .glow(section.getBoolean("glow"));
 
         if (Material.valueOf(section.getString("material")).equals(Material.PLAYER_HEAD))
             builder.setSkullTexture(section.getString("skull-texture"));
-        if (section.getBoolean("glow"))
-            builder.glow();
 
         return builder.build();
     }
 
-    public static String applyPlaceHolders(Mail mail, String string) {
+    public static String applyPlaceHolders(Mail mail, String string, UUID player) {
+
+        Locale.LANG lang = MailMe.getInstance().getDataStoreHandler().getPlayerData(player).getLang();
+        Locale locale = MailMe.getInstance().getLocale();
+
         string = string.replaceAll("@time", mail.getDate().toString());
-        string = string.replaceAll("@sender", mail.getSender() == null ? "???" : Bukkit.getOfflinePlayer(mail.getSender()).getName());
+
+        string = string.replaceAll("@sender", mail.isAnonymous() ? locale.getMessage(lang, "mail.anonymous") : mail.isServer() ? locale.getMessage(lang, "mail.server") : mail.getSender() == null ? locale.getMessage(lang, "mail.unknown") : Bukkit.getOfflinePlayer(mail.getSender()).getName());
         string = string.replaceAll("@type", mail.getMailType().toString());
         string = string.replaceAll("@read", String.valueOf(mail.isRead()));
         return string;
     }
 
-    public static List<String> applyPlaceHolders(Mail mail, List<String> string) {
-        return string.stream().map(str -> applyPlaceHolders(mail, str)).collect(Collectors.toList());
+    public static List<String> applyPlaceHolders(Mail mail, List<String> string, UUID player) {
+        return string.stream().map(str -> applyPlaceHolders(mail, str, player)).collect(Collectors.toList());
     }
 
     public static void playNoteEffect(Player player, Location location) {

@@ -1,5 +1,5 @@
 name: MailMe
-version: 1.3.3
+version: 1.4.0
 main: com.haroldstudios.mailme.MailMe
 api-version: 1.13
 authors: [Harry0198]
@@ -7,6 +7,7 @@ description: This plugin allows players to transfer items, messages, sounds, loc
 softdepend:
   - PlaceholderAPI
   - Vault
+  - Multiverse
 
 commands:
   mail:

@@ -37,45 +37,13 @@ public final class MailMessages extends Mail {
     /**
      *
      * @param icon Icon ItemStack
-     * @param message Message mail
-     * @param recipients List of OfflinePlayers
-     */
-    public MailMessages(ItemStack icon, List<OfflinePlayer> recipients, String message) {
-        this(icon, recipients, message, null);
-    }
-
-    /**
-     *
-     * @param icon Icon ItemStack
-     * @param recipients List of OfflinePlayers
-     * @param message Message mail
-     * @param sender Sender of Mail
-     */
-    public MailMessages(ItemStack icon,  List<OfflinePlayer> recipients, String message, UUID sender) {
-        this(icon, new Date(), recipients, message, sender);
-    }
-
-    /**
-     *
-     * @param icon Icon ItemStack
-     * @param date Date to stamp onto mail
-     * @param recipients List of OfflinePlayers
-     * @param message Message mail
-     */
-    public MailMessages(ItemStack icon, Date date, List<OfflinePlayer> recipients, String message) {
-        this(icon, date, recipients, message,null);
-    }
-
-    /**
-     *
-     * @param icon Icon ItemStack
      * @param date Date to stamp onto mail
      * @param recipients List of OfflinePlayers
      * @param message Message mail
      * @param sender Sender of Mail
      */
-    public MailMessages(ItemStack icon, Date date, List<OfflinePlayer> recipients, String message, UUID sender) {
-        super(icon, date);
+    public MailMessages(ItemStack icon, Date date, List<UUID> recipients, String message, UUID sender, boolean anonymous, boolean server) {
+        super(icon, date, anonymous, server);
         this.message = message;
         super.setSender(sender);
         super.addRecipients(recipients);
@@ -115,7 +83,7 @@ public final class MailMessages extends Mail {
 
     @Override
     public Mail clone() {
-        MailMessages mail = new MailMessages(getIcon(), getDate(), Collections.emptyList(), getMessage(), getSender());
+        MailMessages mail = new MailMessages(getIcon(), getDate(), Collections.emptyList(), getMessage(), getSender(), isAnonymous(), isServer());
         mail.addRecipientsUUID(getRecipients());
         return mail;
     }

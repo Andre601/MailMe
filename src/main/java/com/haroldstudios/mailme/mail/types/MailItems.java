@@ -37,35 +37,6 @@ public final class MailItems extends Mail implements Serializable {
 
     private List<ItemStack> items;
 
-    /**
-     *
-     * @param recipients List of OfflinePlayers
-     * @param stacks List of ItemStacks
-     */
-    public MailItems(List<OfflinePlayer> recipients, List<ItemStack> stacks) {
-        this(new ItemStack(Material.STONE), recipients, stacks);
-    }
-
-    /**
-     *
-     * @param icon Icon ItemStack
-     * @param recipients List of OfflinePlayers
-     * @param stacks List of ItemStacks
-     */
-    public MailItems(ItemStack icon, List<OfflinePlayer> recipients, List<ItemStack> stacks) {
-        this(icon,new Date(),recipients,stacks,null);
-    }
-
-    /**
-     *
-     * @param icon Icon ItemStack
-     * @param date Date to stamp onto mail
-     * @param recipients List of OfflinePlayers
-     * @param stacks List of ItemStacks
-     */
-    public MailItems(ItemStack icon, Date date, List<OfflinePlayer> recipients, List<ItemStack> stacks) {
-        this(icon, date, recipients, stacks, null);
-    }
 
     /**
      *
@@ -74,26 +45,14 @@ public final class MailItems extends Mail implements Serializable {
      * @param stacks List of ItemStack mail
      * @param sender Sender of Mail
      */
-    public MailItems(ItemStack icon, List<OfflinePlayer> recipients, List<ItemStack> stacks, UUID sender) {
-        this(icon, new Date(), recipients, stacks, sender);
-    }
-
-
-    /**
-     *
-     * @param icon Icon ItemStack
-     * @param date Date to stamp onto mail
-     * @param recipients List of OfflinePlayers
-     * @param stacks List of ItemStack mail
-     * @param sender Sender of Mail
-     */
-    public MailItems(ItemStack icon, Date date, List<OfflinePlayer> recipients, List<ItemStack> stacks, UUID sender) {
-        super(icon, date);
+    public MailItems(ItemStack icon, List<UUID> recipients, List<ItemStack> stacks, UUID sender, boolean anonymous, boolean server) {
+        super(icon, new Date(), anonymous, server);
         super.setSender(sender);
         items = stacks;
         if (!recipients.isEmpty()) // Prevents duplicating items
             super.addRecipients(Collections.singletonList(recipients.get(0)));
     }
+
 
     /**
      * Gets all items in Mail
@@ -141,7 +100,7 @@ public final class MailItems extends Mail implements Serializable {
 
     @Override
     public Mail clone() {
-        MailItems mail = new MailItems(getIcon(), getDate(), Collections.emptyList(), getItems(), getSender());
+        MailItems mail = new MailItems(getIcon(), Collections.emptyList(), getItems(), getSender(), isAnonymous(), isServer());
         mail.addRecipientsUUID(getRecipients());
         return mail;
     }

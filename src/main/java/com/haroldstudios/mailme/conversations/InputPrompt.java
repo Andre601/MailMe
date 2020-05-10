@@ -21,12 +21,19 @@ import com.haroldstudios.mailme.components.IncompleteBuilderException;
 import com.haroldstudios.mailme.datastore.PlayerData;
 import com.haroldstudios.mailme.mail.Mail;
 import com.haroldstudios.mailme.mail.MailBuilder;
+import org.bukkit.Sound;
 import org.bukkit.conversations.ConversationContext;
 import org.bukkit.conversations.Prompt;
 import org.bukkit.conversations.StringPrompt;
 import org.bukkit.entity.Player;
 
 public final class InputPrompt extends StringPrompt {
+
+    private final MailBuilder mail;
+
+    public InputPrompt(MailBuilder mail) {
+        this.mail = mail;
+    }
 
     public String getPromptText(ConversationContext context) {
         PlayerData data = MailMe.getInstance().getDataStoreHandler().getPlayerData((Player) context.getForWhom());
@@ -36,17 +43,29 @@ public final class InputPrompt extends StringPrompt {
     @Override
     public Prompt acceptInput(ConversationContext context, String s) {
 
-        if (s.equals("cancel")) {
+        if (s.equals("cancel") || mail.getMailType() == null) {
             return Prompt.END_OF_CONVERSATION;
         }
 
-        Player player = (Player) context.getForWhom();
-        try {
-            Mail mail = MailBuilder.getMailDraft(player).setMessage(s).build();
-            assert mail != null;
+        if (mail.getMailType().equals(Mail.MailType.MAIL_SOUND)) {
+
+            Sound sound;
+            try {
+                sound = Sound.valueOf(s.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                return new InputPrompt(mail);
+            }
+            try {
+                mail.setSound(sound).build();
+                context.setSessionData("mail", mail);
+            } catch (IncompleteBuilderException ignored) { }
+            return Prompt.END_OF_CONVERSATION;
+        }
+
+        if (mail.getMailType().equals(Mail.MailType.MAIL_MESSAGE)) {
+            mail.setMessage(s);
             context.setSessionData("mail", mail);
-        } catch (IncompleteBuilderException ibe) {
-            ibe.printStackTrace();
+            return Prompt.END_OF_CONVERSATION;
         }
         return Prompt.END_OF_CONVERSATION;
     }

@@ -9,6 +9,7 @@ cmd:
   mail-unread: "@prefix &eYou have unread mail!"
   invalid-preset-key: "@prefix &eInvalid preset key! Check your config.yml for valid values"
   vault-insufficient-funds: "@prefix &eInsufficient funds!"
+  unknown-player: "@prefix &eUnknown player or player hasn't joined before!"
 
 text:
   format:
@@ -33,9 +34,12 @@ mail:
   message: "@prefix What would you like the message to say?"
   sound-input: "@prefix What sound would you like to play? Find valid sounds here: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Sound.html"
   no-space: "@prefix You have no space in your inventory to claim this!"
+  unknown: "Unknown"
+  anonymous: "Anonymous"
+  server: "Server"
 
 mailbox:
-  not-chest: "@prefix Your mailbox must be a chest!"
+  not-chest: "@prefix Your mailbox cannot be this item!"
   mailbox-set: "@prefix Your mailbox has been set!"
   mailbox-removed: "@prefix Your mailbox has been removed!"
 
@@ -59,6 +63,15 @@ gui:
 
 
   search: "Write the name of the player you'd like to find"
+  send:
+    title: "&bSend Mail"
+    material: FEATHER
+    amount: 1
+    glow: true
+    lore:
+      - "&7Clicking this"
+      - "&7will open up the mail builder"
+      - "&7menu!"
   mail:
     title: "&7From: &b@sender"
     lore:
@@ -114,6 +127,14 @@ gui:
     glow: true
     skull-texture: ""
   choose:
+    send-anonymously:
+      title: "&aSend anonymously"
+      material: EMERALD
+      amount: 1
+      lore:
+        - "&7Click this to"
+        - "&7send your mail without any"
+        - "&7trace of who sent it!"
     message:
       title: "&8[&eMessage Mail&8]"
       material: PAPER
@@ -210,6 +231,5 @@ gui:
       - ""
       - "&7Alternatively, left click this to"
       - "&7Cancel the operation"
-
 
 

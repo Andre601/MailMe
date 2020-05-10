@@ -21,6 +21,7 @@ import com.haroldstudios.mailme.datastore.PlayerData;
 import com.haroldstudios.mailme.mail.Mail;
 import com.haroldstudios.mailme.utility.Utils;
 import com.haroldstudios.mailme.mail.MailBuilder;
+import me.mattstudios.mfgui.gui.components.ItemBuilder;
 import me.mattstudios.mfgui.gui.guis.Gui;
 import me.mattstudios.mfgui.gui.guis.GuiItem;
 import org.bukkit.ChatColor;
@@ -39,42 +40,43 @@ public final class ChooseTypeGui {
         ui.getFiller().fill(new GuiItem(new ItemStack(Material.BLACK_STAINED_GLASS_PANE), e -> e.setCancelled(true)));
     }
 
-    public void open(Player player) {
-        create(player);
-        // So it doesn't alter actual object
+    public void open(Player player, MailBuilder builder) {
+
         Gui gui = ui;
 
         PlayerData data = plugin.getDataStoreHandler().getPlayerData(player);
+        builder.setSender(player.getUniqueId());
 
+        gui.setDefaultClickAction(event -> event.setCancelled(true));
+
+        // Sets builder types dependent on gui choice & opens next menu
         gui.setItem(2, 3, new GuiItem(Utils.getItemStack(plugin.getLocale().getConfigurationSection(data.getLang(), "gui.choose.message")), event -> {
-            event.setCancelled(true);
-            MailBuilder.getMailDraft(player).setMailType(Mail.MailType.MAIL_MESSAGE);
-            plugin.getGuiHandler().getIconGui(player).open();
+            plugin.getGuiHandler().getIconGui(player, builder.setMailType(Mail.MailType.MAIL_MESSAGE)).open();
             GuiHandler.playUISound(player);
         }));
         gui.setItem(2, 4, new GuiItem(Utils.getItemStack(plugin.getLocale().getConfigurationSection(data.getLang(), "gui.choose.item")), event -> {
-            event.setCancelled(true);
-            MailBuilder.getMailDraft(player).setMailType(Mail.MailType.MAIL_ITEM);
-            plugin.getGuiHandler().getIconGui(player).open();
+            plugin.getGuiHandler().getIconGui(player, builder.setMailType(Mail.MailType.MAIL_ITEM)).open();
             GuiHandler.playUISound(player);
         }));
         gui.setItem(2, 6, new GuiItem(Utils.getItemStack(plugin.getLocale().getConfigurationSection(data.getLang(), "gui.choose.sound")), event -> {
-            event.setCancelled(true);
-            MailBuilder.getMailDraft(player).setMailType(Mail.MailType.MAIL_SOUND);
-            plugin.getGuiHandler().getIconGui(player).open();
+            plugin.getGuiHandler().getIconGui(player, builder.setMailType(Mail.MailType.MAIL_SOUND)).open();
             GuiHandler.playUISound(player);
         }));
         gui.setItem(2, 7, new GuiItem(Utils.getItemStack(plugin.getLocale().getConfigurationSection(data.getLang(), "gui.choose.location")), event -> {
-            event.setCancelled(true);
-            MailBuilder.getMailDraft(player).setMailType(Mail.MailType.MAIL_LOCATION);
-            plugin.getGuiHandler().getIconGui(player).open();
+            plugin.getGuiHandler().getIconGui(player, builder.setMailType(Mail.MailType.MAIL_LOCATION)).open();
             GuiHandler.playUISound(player);
         }));
-        gui.open(player);
-    }
+        gui.addSlotAction(3,5, event -> {
+            GuiHandler.playUISound(player);
 
-    public void create(Player player) {
-        new MailBuilder.Builder(Mail.MailType.MAIL_MESSAGE, player);
+            builder.setAnonymous(!builder.isAnonymous());
+            gui.updateItem(3,5, new GuiItem(new ItemBuilder(Utils.getItemStack(plugin.getLocale().getConfigurationSection(data.getLang(), "gui.choose.send-anonymously"))).glow(builder.isAnonymous()).build()));
+        });
+        if (player.hasPermission( "mailme.base.send-anonymously")) {
+            gui.setItem(3, 5, new GuiItem(new ItemBuilder(Utils.getItemStack(plugin.getLocale().getConfigurationSection(data.getLang(), "gui.choose.send-anonymously"))).glow(builder.isAnonymous()).build()));
+        }
+        gui.open(player);
+
     }
 
 }
