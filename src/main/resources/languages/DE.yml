@@ -4,8 +4,8 @@ VER: 1.1
 prefix: "&8[&eMailMe&8]&r"
 
 mail-types:
-  message: "Botschaft"
-  item: "Artikel"
+  message: "Nachricht"
+  item: "Item"
   sound: "Klang"
   location: "Standort"
 
@@ -17,7 +17,7 @@ cmd:
   vault-insufficient-funds: "@prefix &eUnzureichende Mittel!"
   unknown-player: "@prefix &eUnbekannter Spieler oder Spieler ist noch nicht beigetreten!"
 
-vault: "@prefix &6@amount &ewurde von Ihrem Guthaben entfernt!"
+vault: "@prefix &6@amount &ewurde von deinem Guthaben entfernt!"
 
 text:
   format:
@@ -40,7 +40,7 @@ notify:
 
 mail:
   message: "@prefix Was soll die Nachricht sagen?"
-  sound-input: "@prefix Welchen Sound möchtest du gerne spielen? Gültige Sounds kannst du hier finden: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Sound.html"
+  sound-input: "@prefix Welchen Klang möchtest du gerne spielen? Gültige Klänge kannst du hier finden: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Sound.html"
   no-space: "@prefix Du hast keinen Platz im Inventar, um dies zu beanspruchen!"
   unknown: "Unbekannt"
   anonymous: "Anonym"
@@ -66,7 +66,7 @@ help:
 gui:
   choose-type-title: "MailMe"
   read-title: "Nachricht lesen"
-  choose-player-title: "Wähle Empfänger"
+  choose-player-title: "Empfänger wählen"
   item-input-title: "Items zum senden einfügen"
   choose-icon-title: "Icon wählen"
 
@@ -89,9 +89,9 @@ gui:
     custom-model-data: 0
     glow: true
     lore:
-      - "&7Klicken Sie darauf"
-      - "&7öffnet den Mail Builder"
-      - "&7speisekarte!"
+      - "&7Klicken öffnet"
+      - "&7das Mail-Ersteller"
+      - "&7Menu!"
   mail:
     title: "&7Von: &b@sender"
     lore:
@@ -100,7 +100,7 @@ gui:
       - "&7Nachrichten Typ: &b@type"
       - "&7Gelesen: &b@read"
       - ""
-      - "&bPro Tip: &7Klicke um die Nachricht zu erhalten!"
+      - "&bPro Tipp: &7Klicke um die Nachricht zu erhalten!"
   back-button:
     title: "&8[&eVorige Seite&8]"
     material: REDSTONE_TORCH
@@ -137,7 +137,7 @@ gui:
     amount: 1
     custom-model-data: 0
     lore:
-      - "&7Klicke um nach"
+      - "&7Klicke um per"
       - "&7Spielername zu suchen!"
     glow: true
     skull-texture: ""
@@ -180,23 +180,23 @@ gui:
       glow: true
       skull-texture: ""
     sound:
-      title: "&8[&eSound Nachricht&8]"
+      title: "&8[&eKlang Nachricht&8]"
       material: PAPER
       amount: 1
       custom-model-data: 0
       lore:
         - "&7Klicke um jemandem eine"
-        - "&7Sound Nachricht zu senden!"
+        - "&7klang Nachricht zu senden!"
       glow: true
       skull-texture: ""
     location:
-      title: "&8[&eOrt Nachricht&8]"
+      title: "&8[&Positionsnachricht&8]"
       material: PAPER
       amount: 1
       custom-model-data: 0
       lore:
         - "&7Klicke um jemandem eine"
-        - "&7Orts Nachricht zu senden!"
+        - "&7Positionsnachricht zu senden!"
       glow: true
       skull-texture: ""
   icon-custom:
